@@ -1,0 +1,1004 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MuriCollina</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.5.2/maplibre-gl.min.js"></script>
+<script src="https://unpkg.com/shpjs@6.1.0/dist/shp.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+
+<style>
+/* ── TOKEN SYSTEM (cycling GIS tool, deliberate single dark theme) ────────── */
+:root {
+  --bg:        #0c0d13;
+  --surf:      #13151d;
+  --surf2:     #1a1d27;
+  --surf3:     #22263380;
+  --border:    #272b3a;
+  --border2:   #1e2130;
+  --accent:    #FF4500;
+  --accent-h:  #ff6630;
+  --accent-s:  rgba(255,69,0,.12);
+  --blue:      #4c9be8;
+  --green:     #3dc98a;
+  --text:      #dde1ef;
+  --text-dim:  #6e748f;
+  --text-mute: #353a50;
+  --sb-w:      270px;
+  --top-h:     52px;
+  --pan-h:     196px;
+  color-scheme: dark;
+}
+
+/* ── MAPLIBRE INLINE CSS ─────────────────────────────────────────────────── */
+.maplibregl-map{position:relative;width:100%;height:100%;overflow:hidden;outline:none;background:var(--bg)}
+.maplibregl-canvas{position:absolute;left:0;top:0}
+.maplibregl-canvas-container{position:absolute;top:0;bottom:0;left:0;right:0}
+.maplibregl-canvas-container.maplibregl-interactive{cursor:grab;user-select:none}
+.maplibregl-canvas-container.maplibregl-interactive:active{cursor:grabbing}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-top-left,.maplibregl-ctrl-top-right{position:absolute;pointer-events:none;z-index:2}
+.maplibregl-ctrl-top-left{top:0;left:0}
+.maplibregl-ctrl-top-right{top:0;right:0}
+.maplibregl-ctrl-bottom-left{bottom:0;left:0}
+.maplibregl-ctrl-bottom-right{bottom:0;right:0}
+.maplibregl-ctrl{float:left;clear:both;pointer-events:auto}
+.maplibregl-ctrl-top-right .maplibregl-ctrl{float:right;margin:10px 10px 0 0}
+.maplibregl-ctrl-top-left  .maplibregl-ctrl{float:left;margin:10px 0 0 10px}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl{float:right;margin:0 10px 10px 0}
+.maplibregl-ctrl-bottom-left  .maplibregl-ctrl{float:left;margin:0 0 10px 10px}
+.maplibregl-ctrl-group{border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.55);background:var(--surf);border:1px solid var(--border)}
+.maplibregl-ctrl-group button{width:32px;height:32px;display:block;padding:0;border:0;cursor:pointer;background:transparent;color:var(--text-dim);transition:color .15s,background .15s}
+.maplibregl-ctrl-group button:hover{background:var(--surf2);color:var(--text)}
+.maplibregl-ctrl-group button+button{border-top:1px solid var(--border)}
+.maplibregl-ctrl-icon{background-repeat:no-repeat;display:block;width:100%;height:100%;background-position:50%}
+.maplibregl-ctrl-zoom-in  .maplibregl-ctrl-icon{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%236e748f'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5z'/%3E%3C/svg%3E")}
+.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%236e748f'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-9z'/%3E%3C/svg%3E")}
+.maplibregl-ctrl-compass  .maplibregl-ctrl-icon{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath fill='%23e05' d='M10.5 14l4-8 4 8h-8z'/%3E%3Cpath fill='%236e748f' d='M10.5 16l4 8 4-8h-8z'/%3E%3C/svg%3E")}
+.maplibregl-ctrl-scale{background:rgba(12,13,19,.8);font-size:10px;font-family:Inter,sans-serif;border:1px solid var(--border);border-top:none;padding:0 5px;color:var(--text-dim);box-sizing:border-box;white-space:nowrap}
+.maplibregl-ctrl-attrib{background:rgba(12,13,19,.75);font-size:10px;padding:2px 6px;color:var(--text-mute)}
+.maplibregl-ctrl-attrib a{color:var(--text-dim)}
+.maplibregl-popup{position:absolute;top:0;left:0;display:flex;will-change:transform;pointer-events:none;z-index:3}
+.maplibregl-popup-anchor-top,.maplibregl-popup-anchor-top-right,.maplibregl-popup-anchor-top-left{flex-direction:column}
+.maplibregl-popup-anchor-bottom,.maplibregl-popup-anchor-bottom-right,.maplibregl-popup-anchor-bottom-left{flex-direction:column-reverse}
+.maplibregl-popup-anchor-left{flex-direction:row}
+.maplibregl-popup-anchor-right{flex-direction:row-reverse}
+.maplibregl-popup-content{position:relative;pointer-events:auto;padding:0;box-shadow:0 8px 28px rgba(0,0,0,.6)}
+.maplibregl-popup-close-button{position:absolute;right:0;top:0;cursor:pointer;border:0;padding:7px 10px;background:transparent;font-size:15px;line-height:1;color:var(--text-dim);z-index:1}
+.maplibregl-popup-close-button:hover{color:var(--text)}
+.maplibregl-popup-tip{width:0;height:0;border:10px solid transparent;z-index:1;display:none}
+
+/* ── BASE ────────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+button{font-family:inherit;cursor:pointer}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100%}
+#body{display:flex;flex:1;overflow:hidden}
+#sidebar{
+  width:var(--sb-w);
+  background:var(--surf);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  flex-shrink:0;overflow:hidden;
+  transition:width .25s cubic-bezier(.4,0,.2,1);
+}
+#sidebar.collapsed{width:0}
+#map-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#map{flex:1}
+
+/* ── TOPBAR ──────────────────────────────────────────────────────────────── */
+#topbar{
+  height:var(--top-h);
+  background:var(--surf);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
+  flex-shrink:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px;color:var(--accent);text-decoration:none}
+.logo-mark{
+  width:32px;height:32px;
+  background:var(--accent);
+  border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.logo-mark svg{width:18px;height:18px;fill:white}
+.logo-text{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:700;letter-spacing:.06em;
+  color:var(--text);
+}
+.logo-text span{color:var(--accent)}
+.topbar-sep{width:1px;height:24px;background:var(--border);margin:0 4px}
+#topbar-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tbtn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:7px;border:none;
+  font-size:12px;font-weight:500;transition:all .15s;
+  background:transparent;color:var(--text-dim);
+  border:1px solid var(--border);white-space:nowrap;
+}
+.tbtn:hover{background:var(--surf2);color:var(--text)}
+.tbtn.primary{background:var(--accent);color:white;border-color:transparent}
+.tbtn.primary:hover{background:var(--accent-h)}
+.tbtn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-s)}
+.coming-soon{
+  font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--text-mute);color:var(--surf);border-radius:3px;padding:1px 4px;
+  margin-left:-2px;
+}
+
+/* ── PRESETS SECTION ─────────────────────────────────────────────────────── */
+#presets-section{border-bottom:1px solid var(--border)}
+.preset-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:6px;margin:3px 6px;
+  background:none;border:none;width:calc(100% - 12px);
+  text-align:left;cursor:pointer;transition:background .12s;
+  color:var(--text);font-family:inherit;
+}
+.preset-item:hover{background:var(--surf2)}
+.preset-item:active{background:var(--surf3)}
+.preset-icon{
+  width:26px;height:26px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(76,155,232,.15);color:var(--blue);font-size:13px;
+}
+.preset-name{font-size:12px;font-weight:500;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preset-load{
+  font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--text-mute);transition:color .12s;
+}
+.preset-item:hover .preset-load{color:var(--blue)}
+.preset-spinner{
+  width:12px;height:12px;border:2px solid var(--border);
+  border-top-color:var(--blue);border-radius:50%;
+  animation:spin .7s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#presets-list{padding:4px 0 8px}
+
+/* ── SIDEBAR CONTENT ─────────────────────────────────────────────────────── */
+.sb-head{
+  padding:12px 14px 8px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sb-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-mute);
+}
+.sb-add{
+  display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;
+  color:var(--accent);background:var(--accent-s);border:1px solid var(--accent);
+  border-radius:5px;padding:4px 9px;transition:all .15s;
+}
+.sb-add:hover{background:var(--accent);color:white}
+#layer-list{flex:1;overflow-y:auto;padding:6px}
+.layer-item{
+  border-radius:8px;margin-bottom:4px;
+  background:var(--surf2);border:1px solid var(--border2);
+  overflow:hidden;
+}
+.ly-head{display:flex;align-items:center;padding:8px 10px;gap:8px}
+.ly-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ly-name{flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ly-tog{
+  width:30px;height:16px;border-radius:8px;background:var(--border);
+  position:relative;border:none;transition:background .2s;flex-shrink:0;
+}
+.ly-tog.on{background:var(--accent)}
+.ly-tog::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:12px;height:12px;border-radius:50%;background:white;
+  transition:transform .2s;
+}
+.ly-tog.on::after{transform:translateX(14px)}
+.ly-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px 8px;font-size:11px;color:var(--text-dim);
+}
+.ly-acts{display:flex;gap:2px}
+.ly-btn{
+  background:none;border:none;color:var(--text-mute);
+  padding:3px 5px;border-radius:4px;font-size:12px;transition:all .1s;
+}
+.ly-btn:hover{color:var(--text);background:var(--surf3)}
+.ly-btn.del:hover{color:#ff4466}
+#empty-st{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 20px;text-align:center;gap:10px;
+}
+.em-icon{font-size:36px;opacity:.2}
+#empty-st p{font-size:12px;color:var(--text-dim);line-height:1.7}
+#empty-st strong{color:var(--text-dim);display:block;font-weight:500}
+#sb-stats{border-top:1px solid var(--border);padding:10px 14px}
+.sr{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}
+.sr-l{color:var(--text-dim)}
+.sr-v{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ── DROP OVERLAY ────────────────────────────────────────────────────────── */
+#drop-ov{
+  position:absolute;inset:0;z-index:1000;
+  background:rgba(12,13,19,.9);
+  border:2px dashed var(--accent);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;pointer-events:none;opacity:0;transition:opacity .2s;
+}
+#drop-ov.active{opacity:1;pointer-events:auto}
+.drop-big{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:30px;font-weight:700;letter-spacing:.05em;color:var(--accent);
+}
+.drop-sm{font-size:13px;color:var(--text-dim)}
+
+/* ── BOTTOM PANEL ────────────────────────────────────────────────────────── */
+#bot-panel{
+  height:0;overflow:hidden;background:var(--surf);
+  border-top:1px solid var(--border);
+  transition:height .3s cubic-bezier(.4,0,.2,1);flex-shrink:0;
+}
+#bot-panel.open{height:var(--pan-h)}
+.pan-inner{height:var(--pan-h);display:flex;flex-direction:column;padding:10px 16px 12px}
+.pan-hd{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-shrink:0;
+  min-width:0;
+}
+.pan-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+}
+.pan-chip{
+  font-size:11px;color:var(--text-dim);background:var(--surf2);
+  border:1px solid var(--border);border-radius:4px;padding:2px 7px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;flex-shrink:0;
+}
+.pan-close{
+  margin-left:auto;background:none;border:none;color:var(--text-dim);
+  font-size:18px;line-height:1;padding:2px 4px;flex-shrink:0;
+}
+.pan-close:hover{color:var(--text)}
+.chart-wrap{flex:1;position:relative;min-height:0}
+
+/* ── POPUP ───────────────────────────────────────────────────────────────── */
+.pop-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:10px;
+  min-width:210px;max-width:290px;overflow:hidden;
+}
+.pop-hd{padding:10px 32px 10px 12px;border-bottom:1px solid var(--border);background:var(--surf2)}
+.pop-hd h3{
+  font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
+  letter-spacing:.03em;color:var(--accent);text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pop-hd p{font-size:11px;color:var(--text-dim);margin-top:1px}
+.pop-props{max-height:230px;overflow-y:auto;padding:4px 0}
+.pr{display:flex;align-items:baseline;gap:6px;padding:3px 12px;font-size:12px}
+.pr:hover{background:var(--surf2)}
+.pk{color:var(--text-dim);min-width:72px;flex-shrink:0;font-weight:500}
+.pv{color:var(--text);word-break:break-all;min-width:0}
+.pop-elev-btn{
+  padding:8px 12px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--text-dim);background:var(--surf2);
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  border:none;width:100%;text-align:left;transition:color .15s;
+  font-family:inherit;
+}
+.pop-elev-btn:hover{color:var(--accent)}
+
+/* ── FORMAT GUIDE ────────────────────────────────────────────────────────── */
+#fmt-guide{
+  position:absolute;bottom:60px;right:54px;z-index:50;
+  background:var(--surf);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;width:260px;font-size:12px;
+  box-shadow:0 8px 30px rgba(0,0,0,.55);display:none;
+}
+#fmt-guide.open{display:block}
+#fmt-guide h4{
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;color:var(--text);
+}
+.fr{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2)}
+.fr:last-child{border-bottom:none}
+.fe{font-weight:600;color:var(--accent);min-width:56px;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:12px}
+.fd{color:var(--text-dim);line-height:1.45;font-size:11px}
+.fd em{color:var(--text-dim);font-style:normal;display:block;margin-top:2px}
+
+/* ── TOAST ───────────────────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:20px;
+  right:max(20px,env(safe-area-inset-right,0px));
+  background:var(--surf);border:1px solid var(--border);
+  border-left:3px solid var(--accent);border-radius:7px;
+  padding:10px 14px;font-size:13px;z-index:9999;
+  transform:translateY(70px);opacity:0;transition:all .25s ease;
+  max-width:300px;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.45);
+}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.error{border-left-color:#ff4466}
+#toast.success{border-left-color:var(--green)}
+
+/* ── NO-TILE NOTICE ─────────────────────────────────────────────────────── */
+#tile-notice{
+  position:absolute;top:60px;left:50%;transform:translateX(-50%);
+  background:rgba(12,13,19,.85);border:1px solid var(--border);border-radius:7px;
+  padding:7px 14px;font-size:12px;color:var(--text-dim);z-index:20;
+  white-space:nowrap;backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:7px;
+}
+
+#file-input{display:none}
+@media(max-width:600px){#sidebar{display:none}}
+</style>
+
+<!-- HTML ─────────────────────────────────────────────────────────────────── -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M13.5 2c-5.621 0-10.211 4.443-10.475 10h-3.025l5 6.625 5-6.625h-2.975c.257-3.351 3.06-6 6.475-6 3.584 0 6.5 2.916 6.5 6.5s-2.916 6.5-6.5 6.5c-1.863 0-3.542-.793-4.728-2.053l-2.427 3.216c1.877 1.754 4.389 2.837 7.155 2.837 5.79 0 10.5-4.71 10.5-10.5s-4.71-10.5-10.5-10.5z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Muri<span>Collina</span></div>
+      </div>
+    </div>
+
+    <div class="topbar-sep"></div>
+
+    <div id="topbar-right">
+      <button class="tbtn primary" onclick="document.getElementById('file-input').click()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Carica layer
+      </button>
+      <button id="guide-btn" class="tbtn" onclick="toggleGuide()" title="Formati supportati">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Formati
+      </button>
+      <button class="tbtn" onclick="fitAll()" title="Centra su tutti i layer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4m14 0h-4M12 3v4m0 14v-4M5.6 5.6l2.8 2.8m8.4 8.4 2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+        Centra
+      </button>
+      <button class="tbtn" title="Pianificazione percorso — prossimamente" disabled style="opacity:.45;cursor:default">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Percorso
+        <span class="coming-soon">Presto</span>
+      </button>
+      <button id="sb-tog" class="tbtn active" onclick="toggleSidebar()" title="Mostra/nascondi layer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M14 9l3 3-3 3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="body">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="sb-head">
+        <span class="sb-label">Layer</span>
+        <button class="sb-add" onclick="document.getElementById('file-input').click()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Aggiungi
+        </button>
+      </div>
+
+      <!-- PRESET LAYERS -->
+      <div id="presets-section" hidden>
+        <div class="sb-head" style="padding-top:10px;padding-bottom:6px">
+          <span class="sb-label">Livelli predefiniti</span>
+        </div>
+        <div id="presets-list"></div>
+      </div>
+
+      <div id="layer-list">
+        <div id="empty-st">
+          <div class="em-icon">📂</div>
+          <p>
+            <strong>Nessun layer caricato</strong>
+            Usa i <em>Livelli predefiniti</em> qui sopra, trascina un file sulla mappa, oppure clicca <em>Carica layer</em>.
+          </p>
+        </div>
+      </div>
+
+      <div id="sb-stats" hidden>
+        <div class="sr"><span class="sr-l">Layer attivi</span><span class="sr-v" id="st-layers">0</span></div>
+        <div class="sr"><span class="sr-l">Elementi totali</span><span class="sr-v" id="st-feats">0</span></div>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div id="map-wrap">
+      <div id="drop-ov">
+        <div class="drop-big">📂 Rilascia qui</div>
+        <div class="drop-sm">GeoJSON · SHP (zip) · GPX</div>
+      </div>
+      <div id="map"></div>
+
+      <!-- ELEVATION PANEL -->
+      <div id="bot-panel">
+        <div class="pan-inner">
+          <div class="pan-hd">
+            <span class="pan-title" id="pan-name">Profilo altimetrico</span>
+            <span class="pan-chip" id="pan-dist"></span>
+            <span class="pan-chip" id="pan-gain"></span>
+            <span class="pan-chip" id="pan-range"></span>
+            <button class="pan-close" onclick="closePanel()">✕</button>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="elev-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMAT GUIDE (floating) -->
+<div id="fmt-guide">
+  <h4>Formati supportati</h4>
+  <div class="fr"><div class="fe">.geojson</div><div class="fd">Supporto nativo. Coordinate Z per il profilo altimetrico.<em>Esporta da QGIS: Vettore → Salva come → GeoJSON</em></div></div>
+  <div class="fr"><div class="fe">.zip</div><div class="fd">Shapefile (.shp + .dbf + .prj + .shx) compressi in uno zip.<em>Esporta da QGIS: Vettore → Salva come → Shapefile → comprimi</em></div></div>
+  <div class="fr"><div class="fe">.gpx</div><div class="fd">Tracce GPS con elevazione automatica. Ideale per percorsi bici.<em>Esporta da QGIS oppure scarica da Strava/Komoot</em></div></div>
+  <div class="fr"><div class="fe">.gpkg</div><div class="fd">Non elaborabile direttamente nel browser.<em>Da QGIS: click destro sul layer → Esporta → GeoJSON</em></div></div>
+  <div class="fr"><div class="fe">.tiff</div><div class="fd">Raster non supportato. Esporta curve di livello come vettore.<em>QGIS: Raster → Estrai → Contour</em></div></div>
+</div>
+
+<div id="toast"></div>
+<input type="file" id="file-input" multiple accept=".geojson,.json,.zip,.gpx">
+
+<!-- ───────────── JAVASCRIPT ───────────── -->
+<script>
+'use strict';
+
+/* ── CONSTANTS ──────────────────────────────────────────────────────────── */
+const COLORS = [
+  '#FF4500','#4C9BE8','#FFB400','#3DC98A','#A855F7',
+  '#FF5A5F','#00C4CC','#F97316','#22D3EE','#E879A4'
+];
+
+/* ── PRESET LAYERS ──────────────────────────────────────────────────────────
+   Aggiungi qui i tuoi layer predefiniti.
+   Esporta il .gpkg da QGIS come GeoJSON, carica il file su GitHub (nella
+   stessa repo dell'app), poi incolla qui la URL "raw" del file.
+   Esempio URL raw GitHub:
+   https://raw.githubusercontent.com/<utente>/<repo>/main/<file>.geojson
+
+   Ogni voce: { name: 'Nome mostrato', url: 'URL del GeoJSON', icon: '🗺️' }
+   L'icona è opzionale (default: 🗺️).
+   ─────────────────────────────────────────────────────────────────────────── */
+const PRESETS = [
+  // { name: 'Sentieri Colline', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/sentieri.geojson', icon: '🥾' },
+  // { name: 'Ciclabili TO',     url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/ciclabili.geojson', icon: '🚲' },
+  // { name: 'Curve di livello', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/contour.geojson',  icon: '🏔️' },
+];
+
+/* ── STATE ──────────────────────────────────────────────────────────────── */
+let colorIdx = 0;
+const layerMap = {};     // id → layer object
+let layerSeq  = 0;
+let elevChart = null;
+let popup     = null;
+let pendingGeom  = null; // for elevation from popup button
+let pendingLayer = null;
+
+/* ── GRATICULE ─────────────────────────────────────────────────────────── */
+function makeGraticule(step = 5) {
+  const f = [];
+  for (let lon = -180; lon <= 180; lon += step)
+    f.push({ type:'Feature', properties:{}, geometry:{ type:'LineString', coordinates:[[lon,-85.05],[lon,85.05]] } });
+  for (let lat = -80; lat <= 80; lat += step)
+    f.push({ type:'Feature', properties:{}, geometry:{ type:'LineString', coordinates:[[-180,lat],[180,lat]] } });
+  return { type:'FeatureCollection', features:f };
+}
+
+/* ── MAP INIT ───────────────────────────────────────────────────────────── */
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: { graticule:{ type:'geojson', data:makeGraticule(5) } },
+    layers: [
+      { id:'bg', type:'background', paint:{ 'background-color':'#0c0d13' } },
+      { id:'grid', type:'line', source:'graticule',
+        paint:{ 'line-color':'#191c28', 'line-width':0.7 } }
+    ]
+  },
+  center:[7.72, 45.06],  // Colline di Torino
+  zoom:11, maxZoom:20
+});
+
+map.addControl(new maplibregl.NavigationControl({ showCompass:true }), 'bottom-right');
+map.addControl(new maplibregl.ScaleControl({ unit:'metric' }), 'bottom-left');
+
+// Close popup on blank map click
+map.on('click', e => {
+  if (!e.originalEvent._featureClick && popup) { popup.remove(); popup = null; }
+});
+
+/* ── FILE LOADING ───────────────────────────────────────────────────────── */
+async function loadFile(file) {
+  const name = file.name.replace(/\.[^.]+$/, '');
+  const ext  = file.name.split('.').pop().toLowerCase();
+  toast(`Caricamento ${file.name}…`);
+
+  try {
+    let geo;
+
+    if (ext === 'geojson' || ext === 'json') {
+      geo = JSON.parse(await file.text());
+
+    } else if (ext === 'zip') {
+      const buf = await file.arrayBuffer();
+      geo = await shp(buf);
+      if (Array.isArray(geo)) {
+        geo.forEach((g, i) => addLayer(i ? `${name}_${i+1}` : name, g));
+        return;
+      }
+
+    } else if (ext === 'gpx') {
+      geo = parseGPX(await file.text());
+
+    } else if (ext === 'gpkg') {
+      toast('GPKG non supportato nel browser. Esporta come GeoJSON da QGIS.', 'error'); return;
+
+    } else if (ext === 'tif' || ext === 'tiff') {
+      toast('GeoTIFF non supportato. Esporta le curve di livello come vettori da QGIS.', 'error'); return;
+
+    } else {
+      toast(`Formato .${ext} non riconosciuto`, 'error'); return;
+    }
+
+    if (!geo?.features?.length) throw new Error('File vuoto o GeoJSON non valido');
+    addLayer(name, geo);
+    toast(`"${name}" — ${geo.features.length.toLocaleString('it-IT')} elementi`, 'success');
+
+  } catch (err) {
+    console.error(err);
+    toast(`Errore: ${err.message}`, 'error');
+  }
+}
+
+/* ── GPX PARSER ─────────────────────────────────────────────────────────── */
+function parseGPX(text) {
+  const doc  = new DOMParser().parseFromString(text, 'text/xml');
+  const feats = [];
+
+  doc.querySelectorAll('trk').forEach(trk => {
+    const coords = [];
+    const name   = trk.querySelector('name')?.textContent?.trim() || 'Traccia';
+    trk.querySelectorAll('trkpt').forEach(pt => {
+      const lat = parseFloat(pt.getAttribute('lat'));
+      const lon = parseFloat(pt.getAttribute('lon'));
+      const ele = parseFloat(pt.querySelector('ele')?.textContent ?? 'NaN');
+      coords.push(isNaN(ele) ? [lon,lat] : [lon,lat,ele]);
+    });
+    if (coords.length < 2) return;
+    const elevs = coords.filter(c => c.length===3).map(c => c[2]);
+    const dist  = lineLength(coords);
+    feats.push({ type:'Feature',
+      properties:{ name, distanza_km:(dist/1000).toFixed(2),
+        ele_min: elevs.length ? +Math.min(...elevs).toFixed(0) : null,
+        ele_max: elevs.length ? +Math.max(...elevs).toFixed(0) : null },
+      geometry:{ type:'LineString', coordinates:coords }
+    });
+  });
+
+  doc.querySelectorAll('rte').forEach(rte => {
+    const coords = [];
+    const name   = rte.querySelector('name')?.textContent?.trim() || 'Percorso';
+    rte.querySelectorAll('rtept').forEach(pt => {
+      coords.push([parseFloat(pt.getAttribute('lon')), parseFloat(pt.getAttribute('lat'))]);
+    });
+    if (coords.length >= 2)
+      feats.push({ type:'Feature', properties:{name}, geometry:{type:'LineString',coordinates:coords} });
+  });
+
+  doc.querySelectorAll('wpt').forEach(wpt => {
+    const lat  = parseFloat(wpt.getAttribute('lat'));
+    const lon  = parseFloat(wpt.getAttribute('lon'));
+    const name = wpt.querySelector('name')?.textContent?.trim() || 'Waypoint';
+    feats.push({ type:'Feature', properties:{name}, geometry:{type:'Point',coordinates:[lon,lat]} });
+  });
+
+  return { type:'FeatureCollection', features:feats };
+}
+
+/* ── ADD LAYER ──────────────────────────────────────────────────────────── */
+function addLayer(name, geo) {
+  const id    = `L${++layerSeq}`;
+  const color = COLORS[colorIdx++ % COLORS.length];
+
+  const types   = new Set(geo.features.map(f => f.geometry?.type).filter(Boolean));
+  const isLine  = types.has('LineString')  || types.has('MultiLineString');
+  const isPoly  = types.has('Polygon')     || types.has('MultiPolygon');
+  const isPoint = types.has('Point')       || types.has('MultiPoint');
+
+  // Elevation detection
+  const firstCoord = coord => {
+    const c = coord;
+    if (!c) return null;
+    return Array.isArray(c[0]) ? (Array.isArray(c[0][0]) ? c[0][0] : c[0]) : c;
+  };
+  const hasZ = geo.features.some(f => {
+    const fc = firstCoord(f.geometry?.coordinates);
+    return fc && fc.length >= 3 && !isNaN(fc[2]);
+  });
+  const elevAttr = (() => {
+    const p = geo.features[0]?.properties;
+    if (!p) return null;
+    return Object.keys(p).find(k => /^(elev(ation)?|ele|quota|altit(udine)?|height|z)$/i.test(k)) || null;
+  })();
+
+  layerMap[id] = { id, name, color, visible:true, geo, featureCount:geo.features.length,
+    hasElev:hasZ || !!elevAttr, hasZ, elevAttr, isLine, isPoint, isPoly };
+
+  map.addSource(id, { type:'geojson', data:geo });
+
+  if (isPoly)
+    map.addLayer({ id:`${id}F`, type:'fill', source:id,
+      filter:['match',['geometry-type'],['Polygon','MultiPolygon'],true,false],
+      paint:{ 'fill-color':color, 'fill-opacity':0.22 } });
+
+  if (isPoly || isLine)
+    map.addLayer({ id:`${id}L`, type:'line', source:id,
+      filter:['match',['geometry-type'],['LineString','MultiLineString','Polygon','MultiPolygon'],true,false],
+      paint:{ 'line-color':color,
+        'line-width':['interpolate',['linear'],['zoom'],8,1.5,14,2.5,18,4] } });
+
+  if (isPoint)
+    map.addLayer({ id:`${id}P`, type:'circle', source:id,
+      filter:['match',['geometry-type'],['Point','MultiPoint'],true,false],
+      paint:{ 'circle-color':color,
+        'circle-radius':['interpolate',['linear'],['zoom'],8,3,14,6],
+        'circle-stroke-width':1.5,'circle-stroke-color':'#0c0d13' } });
+
+  [`${id}F`,`${id}L`,`${id}P`].forEach(lid => {
+    if (!map.getLayer(lid)) return;
+    map.on('click', lid, e => {
+      e.originalEvent._featureClick = true;
+      onFeatureClick(e, id);
+    });
+    map.on('mouseenter', lid, () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', lid, () => { map.getCanvas().style.cursor = ''; });
+  });
+
+  renderSidebar();
+  renderStats();
+  fitGeo(geo);
+}
+
+/* ── FEATURE CLICK ──────────────────────────────────────────────────────── */
+function onFeatureClick(e, lid) {
+  if (popup) { popup.remove(); popup = null; }
+  const feat = e.features?.[0];
+  if (!feat) return;
+
+  const layer = layerMap[lid];
+  const props = feat.properties || {};
+  const gtype = feat.geometry?.type || '';
+
+  const titleKey = Object.keys(props).find(k => /^(name|nome|label|desc|titolo)$/i.test(k));
+  const title    = titleKey ? String(props[titleKey]) : (gtype || 'Elemento');
+
+  const skip = new Set(['name','nome','label','desc','titolo']);
+  const rows = Object.entries(props).filter(([k]) => !skip.has(k.toLowerCase()));
+
+  const propsHtml = rows.length
+    ? rows.slice(0,18).map(([k,v]) =>
+        `<div class="pr"><span class="pk">${esc(k)}</span><span class="pv">${v!==null&&v!==undefined?esc(String(v)):'—'}</span></div>`
+      ).join('') + (rows.length>18 ? `<div style="padding:4px 12px;font-size:11px;color:var(--text-mute)">…+${rows.length-18} attributi</div>` : '')
+    : `<div style="padding:8px 12px;font-size:12px;color:var(--text-dim);font-style:italic">Nessun attributo</div>`;
+
+  const showElevBtn = layer.hasElev && layer.hasZ &&
+    (gtype === 'LineString' || gtype === 'MultiLineString');
+
+  pendingLayer = layer;
+  pendingGeom  = feat.geometry;
+
+  const html = `
+    <div class="pop-card">
+      <div class="pop-hd">
+        <h3>${esc(title)}</h3>
+        <p>${esc(layer.name)} · ${gtype}</p>
+      </div>
+      <div class="pop-props">${propsHtml}</div>
+      ${showElevBtn ? `<button class="pop-elev-btn" onclick="showElevation()">📈 Visualizza profilo altimetrico</button>` : ''}
+    </div>`;
+
+  popup = new maplibregl.Popup({ closeButton:true, closeOnClick:false, offset:10 })
+    .setLngLat(e.lngLat).setHTML(html).addTo(map);
+}
+
+/* ── ELEVATION PROFILE ──────────────────────────────────────────────────── */
+function showElevation() {
+  const layer = pendingLayer;
+  const geom  = pendingGeom;
+  if (!layer || !geom) return;
+
+  let coords = [];
+  if (geom.type==='LineString') coords = geom.coordinates;
+  else if (geom.type==='MultiLineString') geom.coordinates.forEach(s => coords.push(...s));
+
+  const withZ = coords.filter(c => c.length >= 3 && !isNaN(c[2]));
+  if (withZ.length < 2) { toast('Nessuna quota Z nel layer. Esporta con coordinate 3D da QGIS.', 'error'); return; }
+
+  const elevs = withZ.map(c => c[2]);
+  const dists = [0];
+  for (let i=1; i<withZ.length; i++)
+    dists.push(dists[dists.length-1] + haversine(withZ[i-1], withZ[i]));
+
+  const totalKm  = (dists[dists.length-1]/1000).toFixed(1);
+  const eleMin   = Math.min(...elevs).toFixed(0);
+  const eleMax   = Math.max(...elevs).toFixed(0);
+  const gain     = elevs.reduce((g,v,i)=> i>0&&v>elevs[i-1] ? g+(v-elevs[i-1]) : g, 0).toFixed(0);
+
+  document.getElementById('pan-name').textContent  = (layer.name || 'Percorso').toUpperCase();
+  document.getElementById('pan-dist').textContent  = `${totalKm} km`;
+  document.getElementById('pan-gain').textContent  = `↑ ${gain} m`;
+  document.getElementById('pan-range').textContent = `${eleMin}–${eleMax} m`;
+
+  // sample max 300 pts
+  const step  = Math.max(1, Math.ceil(withZ.length/300));
+  const sampE = withZ.filter((_,i) => i%step===0).map(c=>c[2]);
+  const sampD = dists.filter((_,i) => i%step===0).map(d=>+(d/1000).toFixed(3));
+
+  document.getElementById('bot-panel').classList.add('open');
+
+  if (elevChart) { elevChart.destroy(); elevChart=null; }
+  const ctx = document.getElementById('elev-chart').getContext('2d');
+  elevChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:sampD,
+      datasets:[{
+        data:sampE,
+        borderColor:'#FF4500',
+        backgroundColor:'rgba(255,69,0,.11)',
+        fill:true, tension:.3, borderWidth:2,
+        pointRadius:0, pointHoverRadius:5,
+        pointHoverBackgroundColor:'#FF4500'
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:{ duration:300 },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          mode:'index', intersect:false,
+          backgroundColor:'rgba(19,21,29,.97)',
+          borderColor:'#272b3a', borderWidth:1,
+          titleColor:'#6e748f', bodyColor:'#dde1ef',
+          titleFont:{size:10}, bodyFont:{family:'Inter',size:13,weight:'600'},
+          callbacks:{
+            title:c => `${c[0].label} km`,
+            label:c => `${Math.round(c.parsed.y)} m s.l.m.`
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{color:'#191c28'},
+          ticks:{color:'#3a3f57',font:{size:10},maxTicksLimit:8,
+            callback:(_,i,t)=> i===0||i===t.length-1||i%Math.ceil(t.length/6)===0 ? `${sampD[i]} km` : ''}
+        },
+        y:{ grid:{color:'#191c28'},
+          ticks:{color:'#3a3f57',font:{size:10},callback:v=>`${v} m`}
+        }
+      }
+    }
+  });
+}
+
+function closePanel() {
+  document.getElementById('bot-panel').classList.remove('open');
+}
+
+/* ── SIDEBAR ────────────────────────────────────────────────────────────── */
+function renderSidebar() {
+  const list  = document.getElementById('layer-list');
+  const empty = document.getElementById('empty-st');
+  const ids   = Object.keys(layerMap);
+
+  empty.hidden = ids.length > 0;
+
+  const items = [...ids].reverse().map(id => {
+    const l  = layerMap[id];
+    const gt = [l.isLine&&'Linee', l.isPoint&&'Punti', l.isPoly&&'Poligoni'].filter(Boolean).join(' · ');
+    return `
+    <div class="layer-item">
+      <div class="ly-head">
+        <div class="ly-dot" style="background:${l.color}"></div>
+        <span class="ly-name" title="${esc(l.name)}">${esc(l.name)}</span>
+        <button class="ly-tog ${l.visible?'on':''}" onclick="toggleVis('${id}')" title="${l.visible?'Nascondi':'Mostra'}"></button>
+      </div>
+      <div class="ly-meta">
+        <span>${l.featureCount.toLocaleString('it-IT')} elem. · ${gt}${l.hasElev?' · 📈':''}</span>
+        <div class="ly-acts">
+          <button class="ly-btn" onclick="zoomTo('${id}')" title="Zoom al layer">⊞</button>
+          <button class="ly-btn del" onclick="removeLayer('${id}')" title="Rimuovi layer">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.innerHTML = `<div id="empty-st" ${ids.length?'hidden':''}>${document.getElementById('empty-st')?.innerHTML||''}</div>${items}`;
+}
+
+function renderStats() {
+  const ids = Object.keys(layerMap);
+  const el  = document.getElementById('sb-stats');
+  el.hidden = ids.length === 0;
+  document.getElementById('st-layers').textContent = ids.length;
+  document.getElementById('st-feats').textContent  =
+    ids.reduce((s,id) => s + layerMap[id].featureCount, 0).toLocaleString('it-IT');
+}
+
+function toggleVis(id) {
+  const l = layerMap[id];
+  l.visible = !l.visible;
+  const v = l.visible ? 'visible' : 'none';
+  [`${id}F`,`${id}L`,`${id}P`].forEach(lid => {
+    if (map.getLayer(lid)) map.setLayoutProperty(lid,'visibility',v);
+  });
+  renderSidebar();
+}
+
+function removeLayer(id) {
+  if (popup) { popup.remove(); popup=null; }
+  [`${id}F`,`${id}L`,`${id}P`].forEach(lid => {
+    if (map.getLayer(lid)) map.removeLayer(lid);
+  });
+  if (map.getSource(id)) map.removeSource(id);
+  delete layerMap[id];
+  renderSidebar();
+  renderStats();
+}
+
+function zoomTo(id) { fitGeo(layerMap[id].geo); }
+
+function fitAll() {
+  const all = Object.values(layerMap).flatMap(l => l.geo.features);
+  if (!all.length) return;
+  fitGeo({ type:'FeatureCollection', features:all });
+}
+
+/* ── PRESET LOADER ──────────────────────────────────────────────────────── */
+function renderPresets() {
+  const sec  = document.getElementById('presets-section');
+  const list = document.getElementById('presets-list');
+  if (!PRESETS.length) { sec.hidden = true; return; }
+  sec.hidden = false;
+  list.innerHTML = PRESETS.map((p, i) => `
+    <button class="preset-item" id="preset-btn-${i}" onclick="loadPreset(${i})">
+      <div class="preset-icon">${p.icon || '🗺️'}</div>
+      <span class="preset-name">${esc(p.name)}</span>
+      <div class="preset-spinner" id="preset-spin-${i}"></div>
+      <span class="preset-load" id="preset-lbl-${i}">Carica</span>
+    </button>`).join('');
+}
+
+async function loadPreset(i) {
+  const p    = PRESETS[i];
+  const btn  = document.getElementById(`preset-btn-${i}`);
+  const spin = document.getElementById(`preset-spin-${i}`);
+  const lbl  = document.getElementById(`preset-lbl-${i}`);
+  if (!p || btn.disabled) return;
+
+  btn.disabled = true;
+  spin.style.display = 'block';
+  lbl.style.display  = 'none';
+  toast(`Caricamento ${p.name}…`);
+
+  try {
+    const res = await fetch(p.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status} — verifica che l'URL sia corretto e il file sia pubblico`);
+    const geo = await res.json();
+    if (!geo?.features?.length) throw new Error('File vuoto o non è GeoJSON valido');
+    addLayer(p.name, geo);
+    toast(`"${p.name}" — ${geo.features.length.toLocaleString('it-IT')} elementi`, 'success');
+    lbl.textContent = '✓';
+    lbl.style.display = 'block';
+    lbl.style.color = 'var(--green)';
+  } catch(err) {
+    console.error(err);
+    toast(`Errore: ${err.message}`, 'error');
+    btn.disabled = false;
+    spin.style.display = 'none';
+    lbl.style.display  = 'block';
+  }
+}
+
+/* ── DRAG & DROP ────────────────────────────────────────────────────────── */
+const mapWrap = document.getElementById('map-wrap');
+const dropOv  = document.getElementById('drop-ov');
+mapWrap.addEventListener('dragover', e => { e.preventDefault(); dropOv.classList.add('active'); });
+mapWrap.addEventListener('dragleave', e => { if (!mapWrap.contains(e.relatedTarget)) dropOv.classList.remove('active'); });
+mapWrap.addEventListener('drop', e => {
+  e.preventDefault();
+  dropOv.classList.remove('active');
+  Array.from(e.dataTransfer.files).forEach(loadFile);
+});
+document.getElementById('file-input').addEventListener('change', e => {
+  Array.from(e.target.files).forEach(loadFile);
+  e.target.value = '';
+});
+
+/* ── TOGGLES ────────────────────────────────────────────────────────────── */
+let sbOpen = true;
+function toggleSidebar() {
+  sbOpen = !sbOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sbOpen);
+  document.getElementById('sb-tog').classList.toggle('active', sbOpen);
+}
+
+let guideOpen = false;
+function toggleGuide() {
+  guideOpen = !guideOpen;
+  document.getElementById('fmt-guide').classList.toggle('open', guideOpen);
+}
+document.addEventListener('click', e => {
+  if (guideOpen && !e.target.closest('#fmt-guide') && !e.target.closest('#guide-btn')) {
+    guideOpen = false;
+    document.getElementById('fmt-guide').classList.remove('open');
+  }
+});
+
+/* ── UTILS ──────────────────────────────────────────────────────────────── */
+function haversine([lon1,lat1], [lon2,lat2]) {
+  const R = 6371000, dl = (lat2-lat1)*Math.PI/180, dln = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dl/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dln/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function lineLength(coords) {
+  return coords.reduce((s,c,i) => i===0 ? 0 : s+haversine(coords[i-1],c), 0);
+}
+
+function allCoords(geom) {
+  if (!geom) return [];
+  const {type,coordinates:c,geometries:g} = geom;
+  switch(type) {
+    case 'Point':           return [c];
+    case 'LineString':      return c;
+    case 'Polygon':         return c.flat();
+    case 'MultiPoint':      return c;
+    case 'MultiLineString': return c.flat();
+    case 'MultiPolygon':    return c.flat(2);
+    case 'GeometryCollection': return g.flatMap(allCoords);
+    default:                return [];
+  }
+}
+
+function fitGeo(geo) {
+  const cs = geo.features.flatMap(f => allCoords(f.geometry));
+  if (!cs.length) return;
+  const lons = cs.map(c=>c[0]), lats = cs.map(c=>c[1]);
+  map.fitBounds([[Math.min(...lons),Math.min(...lats)],[Math.max(...lons),Math.max(...lats)]],
+    { padding:60, maxZoom:16, duration:650 });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className=''; }, 3800);
+}
+
+/* ── INIT ───────────────────────────────────────────────────────────────── */
+renderPresets();
+</script>
+
+</body></html>
