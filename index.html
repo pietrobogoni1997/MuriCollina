@@ -446,15 +446,22 @@ function makeGraticule(step = 5) {
 /* ── MAP INIT ───────────────────────────────────────────────────────────── */
 const map = new maplibregl.Map({
   container: 'map',
-  style: {
-    version: 8,
-    sources: { graticule:{ type:'geojson', data:makeGraticule(5) } },
-    layers: [
-      { id:'bg', type:'background', paint:{ 'background-color':'#0c0d13' } },
-      { id:'grid', type:'line', source:'graticule',
-        paint:{ 'line-color':'#191c28', 'line-width':0.7 } }
-    ]
+  style: style: {
+  version: 8,
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  sources: {
+    carto: {
+      type: "raster",
+      tiles: ["https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© CARTO © OpenStreetMap contributors"
+    }
   },
+  layers: [
+    { id: "bg", type: "background", paint: { "background-color": "#0c0d13" } },
+    { id: "carto-tiles", type: "raster", source: "carto", paint: { "raster-opacity": 0.85 } }
+  ]
+},
   center:[7.72, 45.06],  // Colline di Torino
   zoom:11, maxZoom:20
 });
