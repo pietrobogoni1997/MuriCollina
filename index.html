@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <script>document.documentElement.dataset.theme='light'</script>
-<title>MuriMADDAness</title>
+<title>GeoVelo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -426,7 +426,7 @@ button{font-family:inherit;cursor:pointer}
         <svg viewBox="0 0 24 24"><path d="M13.5 2c-5.621 0-10.211 4.443-10.475 10h-3.025l5 6.625 5-6.625h-2.975c.257-3.351 3.06-6 6.475-6 3.584 0 6.5 2.916 6.5 6.5s-2.916 6.5-6.5 6.5c-1.863 0-3.542-.793-4.728-2.053l-2.427 3.216c1.877 1.754 4.389 2.837 7.155 2.837 5.79 0 10.5-4.71 10.5-10.5s-4.71-10.5-10.5-10.5z"/></svg>
       </div>
       <div>
-        <div class="logo-text">MADDA<span>ness</span></div>
+        <div class="logo-text">Geo<span>Velo</span></div>
       </div>
     </div>
 
@@ -578,9 +578,9 @@ const COLORS = [
    L'icona è opzionale (default: 🗺️).
    ─────────────────────────────────────────────────────────────────────────── */
 const PRESETS = [
-   { name: 'Tutti i Muri', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/Muri_v4.geojson', icon: '🏔️' },
+  // { name: 'Sentieri Colline', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/sentieri.geojson', icon: '🥾' },
   // { name: 'Ciclabili TO',     url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/ciclabili.geojson', icon: '🚲' },
-  // { name: 'Curve di livello', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/contour.geojson',  icon: '🥾' },
+  // { name: 'Curve di livello', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/contour.geojson',  icon: '🏔️' },
 ];
 
 /* ── STATE ──────────────────────────────────────────────────────────────── */
@@ -682,6 +682,7 @@ const map = new maplibregl.Map({
 
 map.addControl(new maplibregl.NavigationControl({ showCompass:true }), 'bottom-right');
 map.addControl(new maplibregl.ScaleControl({ unit:'metric' }), 'bottom-left');
+setBasemap('osm');
 
 // Close popup on blank map click
 map.on('click', e => {
@@ -870,8 +871,9 @@ function addLayer(name, geo) {
         'circle-radius':['interpolate',['linear'],['zoom'],8,3,14,6],
         'circle-stroke-width':1.5,'circle-stroke-color':'#0c0d13' } });
 
-  // Endpoint markers for line layers
-  if (isLine) {
+  // Endpoint markers only for climb layers (those with slope attribute)
+  // Full route traces have hundreds of features → skip to avoid marker clutter
+  if (isLine && slopeProp) {
     const epGeo = buildEndpointGeo(geo);
     map.addSource(`${id}E`, { type:'geojson', data: epGeo });
     // Start: green-filled circle (departure)
@@ -1366,6 +1368,7 @@ function toggleVis(id) {
 
 function removeLayer(id) {
   if (popup) { popup.remove(); popup=null; }
+  closePanel(); elevData = null; clearMapHoverMarker();
   [`${id}F`,`${id}L`,`${id}P`,`${id}ES`,`${id}EA`,`${id}EE`].forEach(lid => {
     if (map.getLayer(lid)) map.removeLayer(lid);
   });
