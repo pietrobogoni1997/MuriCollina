@@ -22,9 +22,9 @@
   --accent-s:  rgba(255,69,0,.12);
   --blue:      #4c9be8;
   --green:     #3dc98a;
-  --text:      #dde1ef;
-  --text-dim:  #6e748f;
-  --text-mute: #353a50;
+  --text:      #ffffff;     /* era #dde1ef — testo principale, ora bianco pieno */
+  --text-dim:  #a0a8c4;     /* era #6e748f — testo secondario, più luminoso */
+  --text-mute: #5a6080;     /* era #353a50 — quasi invisibile, ora almeno leggibile */
   --sb-w:      270px;
   --top-h:     52px;
   --pan-h:     196px;
@@ -587,12 +587,10 @@ const BASEMAPS = {
   dark:  { label:'Scuro',      tiles: null },
   osm:   { label:'OSM',        tiles:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
            attr:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
-  carto: { label:'Voyager',    tiles:'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-           attr:'© <a href="https://carto.com">CARTO</a> © OpenStreetMap' },
   topo:  { label:'OpenTopoMap',tiles:'https://tile.opentopomap.org/{z}/{x}/{y}.png',
            attr:'© <a href="https://opentopomap.org">OpenTopoMap</a> © OpenStreetMap' },
 };
-let currentBasemap = 'dark';
+let currentBasemap = 'osm';
 
 function setBasemap(id) {
   if (!map.isStyleLoaded()) { map.once('idle', () => setBasemap(id)); return; }
@@ -849,7 +847,7 @@ function onFeatureClick(e, lid) {
         <p>${esc(layer.name)} · ${gtype}</p>
       </div>
       <div class="pop-props">${propsHtml}</div>
-      ${showElevBtn ? `<button class="pop-elev-btn" onclick="showElevation()">📈 Visualizza profilo altimetrico</button>` : ''}
+      ${showElevBtn ? `<button class="pop-elev-btn" onclick="showElevation()">📈 Visualizza profilo</button>` : ''}
     </div>`;
 
   popup = new maplibregl.Popup({ closeButton:true, closeOnClick:false, offset:10 })
