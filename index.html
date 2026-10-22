@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>MuriCollina</title>
+<title>GeoVelo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,6 +129,25 @@ button{font-family:inherit;cursor:pointer}
 .tbtn.primary{background:var(--accent);color:white;border-color:transparent}
 .tbtn.primary:hover{background:var(--accent-h)}
 .tbtn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-s)}
+.bm-drop{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;min-width:168px;
+  box-shadow:0 12px 32px rgba(0,0,0,.6);z-index:300;
+}
+.bm-opt{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:9px 14px;border:none;background:none;
+  color:var(--text-dim);font-size:12px;font-weight:500;
+  cursor:pointer;transition:background .12s,color .12s;
+  font-family:inherit;text-align:left;
+}
+.bm-opt:hover{background:var(--surf2);color:var(--text)}
+.bm-opt.active{color:var(--accent)}
+.bm-opt .bm-swatch{
+  width:28px;height:18px;border-radius:4px;flex-shrink:0;
+  border:1px solid var(--border);
+}
 .coming-soon{
   font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
   background:var(--text-mute);color:var(--surf);border-radius:3px;padding:1px 4px;
@@ -212,6 +231,35 @@ button{font-family:inherit;cursor:pointer}
 }
 .ly-btn:hover{color:var(--text);background:var(--surf3)}
 .ly-btn.del:hover{color:#ff4466}
+.ly-btn.cfg{color:var(--text-mute)}
+.ly-btn.cfg.open{color:var(--blue);background:rgba(76,155,232,.12)}
+/* Field filter panel */
+.ly-fields{
+  padding:6px 10px 10px;
+  border-top:1px solid var(--border2);
+  background:rgba(0,0,0,.12);
+}
+.ly-fields-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-mute);padding:2px 0 6px;
+}
+.ly-field-row{
+  display:flex;align-items:center;gap:8px;padding:4px 2px;
+  cursor:pointer;border-radius:4px;transition:background .1s;
+}
+.ly-field-row:hover{background:var(--surf3)}
+.ly-field-chk{
+  width:14px;height:14px;border-radius:3px;flex-shrink:0;
+  border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;line-height:1;transition:all .15s;
+}
+.ly-field-chk.on{background:var(--accent);border-color:var(--accent);color:white}
+.ly-field-name{
+  flex:1;font-size:11px;color:var(--text-dim);min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ly-field-row:hover .ly-field-name{color:var(--text)}
 #empty-st{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:32px 20px;text-align:center;gap:10px;
@@ -266,7 +314,20 @@ button{font-family:inherit;cursor:pointer}
   font-size:18px;line-height:1;padding:2px 4px;flex-shrink:0;
 }
 .pan-close:hover{color:var(--text)}
-.chart-wrap{flex:1;position:relative;min-height:0}
+.chart-wrap{flex:1;position:relative;min-height:0;display:flex;align-items:stretch}
+.chart-wrap canvas{display:block}
+.slope-leg{
+  position:absolute;bottom:20px;right:4px;
+  display:flex;gap:5px;align-items:center;
+  font-size:9px;color:var(--text-dim);pointer-events:none;letter-spacing:.02em;
+}
+.slope-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.elev-tip{
+  position:absolute;top:4px;left:0;
+  background:rgba(19,21,29,.95);border:1px solid var(--border);
+  border-radius:6px;padding:3px 10px;font-size:12px;color:var(--text);
+  pointer-events:none;white-space:nowrap;z-index:10;
+}
 
 /* ── POPUP ───────────────────────────────────────────────────────────────── */
 .pop-card{
@@ -348,7 +409,7 @@ button{font-family:inherit;cursor:pointer}
         <svg viewBox="0 0 24 24"><path d="M13.5 2c-5.621 0-10.211 4.443-10.475 10h-3.025l5 6.625 5-6.625h-2.975c.257-3.351 3.06-6 6.475-6 3.584 0 6.5 2.916 6.5 6.5s-2.916 6.5-6.5 6.5c-1.863 0-3.542-.793-4.728-2.053l-2.427 3.216c1.877 1.754 4.389 2.837 7.155 2.837 5.79 0 10.5-4.71 10.5-10.5s-4.71-10.5-10.5-10.5z"/></svg>
       </div>
       <div>
-        <div class="logo-text">Muri<span>Collina</span></div>
+        <div class="logo-text">Geo<span>Velo</span></div>
       </div>
     </div>
 
@@ -372,6 +433,19 @@ button{font-family:inherit;cursor:pointer}
         Percorso
         <span class="coming-soon">Presto</span>
       </button>
+      <div style="position:relative">
+        <button class="tbtn" id="bm-btn" onclick="toggleBmDrop(event)" title="Mappa di base">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          <span id="bm-label">Scuro</span>
+        </button>
+        <div id="bm-drop" class="bm-drop" hidden>
+          <button class="bm-opt active" data-bm="dark"  onclick="setBasemap('dark')"><span class="bm-swatch" style="background:#0c0d13"></span>Scuro</button>
+          <button class="bm-opt"        data-bm="osm"   onclick="setBasemap('osm')"><span class="bm-swatch" style="background:#b5d0a8;border-color:#8aaa7d"></span>OSM Standard</button>
+          <button class="bm-opt"        data-bm="carto" onclick="setBasemap('carto')"><span class="bm-swatch" style="background:#e8e4db;border-color:#ccc5b6"></span>Voyager</button>
+          <button class="bm-opt"        data-bm="topo"  onclick="setBasemap('topo')"><span class="bm-swatch" style="background:#adc99b;border-color:#88b06a"></span>OpenTopoMap</button>
+        </div>
+      </div>
+
       <button id="sb-tog" class="tbtn active" onclick="toggleSidebar()" title="Mostra/nascondi layer">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M14 9l3 3-3 3"/></svg>
       </button>
@@ -433,6 +507,14 @@ button{font-family:inherit;cursor:pointer}
           </div>
           <div class="chart-wrap">
             <canvas id="elev-chart"></canvas>
+            <div id="elev-tip" class="elev-tip" hidden></div>
+            <div class="slope-leg">
+              <span class="slope-dot" style="background:#3dc98a"></span>&lt;3%&ensp;
+              <span class="slope-dot" style="background:#f5c518"></span>3–6%&ensp;
+              <span class="slope-dot" style="background:#ff8c00"></span>6–10%&ensp;
+              <span class="slope-dot" style="background:#FF4500"></span>10–15%&ensp;
+              <span class="slope-dot" style="background:#c0392b"></span>&gt;15%
+            </div>
           </div>
         </div>
       </div>
@@ -474,19 +556,21 @@ const COLORS = [
    L'icona è opzionale (default: 🗺️).
    ─────────────────────────────────────────────────────────────────────────── */
 const PRESETS = [
-   { name: 'Muri MADDAness', url: 'https://raw.githubusercontent.com/pietrobogoni1997/Muricollina/main/Muri_v4.geojson', icon: '🏔️' },
+  // { name: 'Sentieri Colline', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/sentieri.geojson', icon: '🥾' },
   // { name: 'Ciclabili TO',     url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/ciclabili.geojson', icon: '🚲' },
-  // { name: 'Curve di livello', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/contour.geojson',  icon: '🥾' },
+  // { name: 'Curve di livello', url: 'https://raw.githubusercontent.com/tuousername/geovelo/main/contour.geojson',  icon: '🏔️' },
 ];
 
 /* ── STATE ──────────────────────────────────────────────────────────────── */
 let colorIdx = 0;
 const layerMap = {};     // id → layer object
 let layerSeq  = 0;
-let elevChart = null;
+let elevChart = null; // unused – kept to avoid potential refs
+let elevData  = null; // current profile for hover
 let popup     = null;
 let pendingGeom  = null; // for elevation from popup button
 let pendingLayer = null;
+let pendingProps = null; // original feature properties (with lunghezza, pendenza media, …)
 
 /* ── GRATICULE ─────────────────────────────────────────────────────────── */
 function makeGraticule(step = 5) {
@@ -497,6 +581,49 @@ function makeGraticule(step = 5) {
     f.push({ type:'Feature', properties:{}, geometry:{ type:'LineString', coordinates:[[-180,lat],[180,lat]] } });
   return { type:'FeatureCollection', features:f };
 }
+
+/* ── BASEMAP ─────────────────────────────────────────────────────────────── */
+const BASEMAPS = {
+  dark:  { label:'Scuro',      tiles: null },
+  osm:   { label:'OSM',        tiles:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+           attr:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' },
+  carto: { label:'Voyager',    tiles:'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+           attr:'© <a href="https://carto.com">CARTO</a> © OpenStreetMap' },
+  topo:  { label:'OpenTopoMap',tiles:'https://tile.opentopomap.org/{z}/{x}/{y}.png',
+           attr:'© <a href="https://opentopomap.org">OpenTopoMap</a> © OpenStreetMap' },
+};
+let currentBasemap = 'dark';
+
+function setBasemap(id) {
+  if (!map.isStyleLoaded()) { map.once('idle', () => setBasemap(id)); return; }
+  const bm = BASEMAPS[id];
+  if (!bm) return;
+  currentBasemap = id;
+  if (map.getLayer('_bm')) map.removeLayer('_bm');
+  if (map.getSource('_bm')) map.removeSource('_bm');
+  if (bm.tiles) {
+    map.addSource('_bm', { type:'raster', tiles:[bm.tiles], tileSize:256, attribution: bm.attr || '' });
+    map.addLayer({ id:'_bm', type:'raster', source:'_bm', paint:{'raster-opacity':1} }, 'grid');
+    map.setPaintProperty('bg', 'background-color', 'rgba(0,0,0,0)');
+    map.setLayoutProperty('grid', 'visibility', 'none');
+  } else {
+    map.setPaintProperty('bg', 'background-color', '#0c0d13');
+    map.setLayoutProperty('grid', 'visibility', 'visible');
+  }
+  document.querySelectorAll('.bm-opt').forEach(el => el.classList.toggle('active', el.dataset.bm === id));
+  document.getElementById('bm-label').textContent = bm.label;
+  document.getElementById('bm-drop').hidden = true;
+}
+
+function toggleBmDrop(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('bm-drop');
+  drop.hidden = !drop.hidden;
+}
+document.addEventListener('click', () => {
+  const drop = document.getElementById('bm-drop');
+  if (drop) drop.hidden = true;
+});
 
 /* ── MAP INIT ───────────────────────────────────────────────────────────── */
 const map = new maplibregl.Map({
@@ -636,8 +763,15 @@ function addLayer(name, geo) {
     return Object.keys(p).find(k => /^(elev(ation)?|ele|quota|altit(udine)?|height|z)$/i.test(k)) || null;
   })();
 
+  // Collect all field names across features
+  const allFields = [...new Set(geo.features.flatMap(f => Object.keys(f.properties || {})))].filter(k => k !== '_gvIdx');
+
   layerMap[id] = { id, name, color, visible:true, geo, featureCount:geo.features.length,
-    hasElev:hasZ || !!elevAttr, hasZ, elevAttr, isLine, isPoint, isPoly };
+    hasElev:hasZ || !!elevAttr, hasZ, elevAttr, isLine, isPoint, isPoly,
+    allFields, hiddenFields: new Set(), fieldsOpen: false };
+
+  // Tag each feature with its index so we can recover Z coords after MapLibre strips them
+  geo.features.forEach((f, i) => { f.properties = f.properties || {}; f.properties._gvIdx = i; });
 
   map.addSource(id, { type:'geojson', data:geo });
 
@@ -687,8 +821,9 @@ function onFeatureClick(e, lid) {
   const titleKey = Object.keys(props).find(k => /^(name|nome|label|desc|titolo)$/i.test(k));
   const title    = titleKey ? String(props[titleKey]) : (gtype || 'Elemento');
 
-  const skip = new Set(['name','nome','label','desc','titolo']);
-  const rows = Object.entries(props).filter(([k]) => !skip.has(k.toLowerCase()));
+  const skip = new Set(['name','nome','label','desc','titolo','_gvidx']);
+  const rows = Object.entries(props).filter(([k]) =>
+    !skip.has(k.toLowerCase()) && !layer.hiddenFields.has(k));
 
   const propsHtml = rows.length
     ? rows.slice(0,18).map(([k,v]) =>
@@ -700,7 +835,12 @@ function onFeatureClick(e, lid) {
     (gtype === 'LineString' || gtype === 'MultiLineString');
 
   pendingLayer = layer;
-  pendingGeom  = feat.geometry;
+  // MapLibre strips Z from click-event geometry — recover original from source GeoJSON
+  const srcIdx = feat.properties?._gvIdx;
+  const srcFeat = (srcIdx !== undefined && layer.geo.features[srcIdx])
+    ? layer.geo.features[srcIdx] : null;
+  pendingGeom  = srcFeat ? srcFeat.geometry : feat.geometry;
+  pendingProps = srcFeat ? srcFeat.properties : (feat.properties || {});
 
   const html = `
     <div class="pop-card">
@@ -716,84 +856,229 @@ function onFeatureClick(e, lid) {
     .setLngLat(e.lngLat).setHTML(html).addTo(map);
 }
 
-/* ── ELEVATION PROFILE ──────────────────────────────────────────────────── */
+/* ── ELEVATION PROFILE — native Canvas 2D (no Chart.js) ────────────────── */
+// Slope colour scale, fixed intervals (absolute %)
+const SLOPE_COLORS = [
+  { max:  3, color:'#3dc98a' },
+  { max:  6, color:'#f5c518' },
+  { max: 10, color:'#ff8c00' },
+  { max: 15, color:'#FF4500' },
+  { max: Infinity, color:'#c0392b' },
+];
+function slopeColor(pct) {
+  const a = Math.abs(pct);
+  return (SLOPE_COLORS.find(s => a <= s.max) || SLOPE_COLORS.at(-1)).color;
+}
+
+// Draws the elevation profile on a canvas using the 2D API directly.
+// Works regardless of container visibility — canvas rendering is always independent.
+function renderElevCanvas(canvas) {
+  const d = elevData;
+  if (!d) return;
+  const { sampD, sampE, sampSlope, hoverIdx, W, H } = d;
+  const dpr = window.devicePixelRatio || 1;
+  const ctx = canvas.getContext('2d');
+
+  const pad = { t:6, r:10, b:24, l:42 };
+  const cw  = W - pad.l - pad.r;
+  const ch  = H - pad.t - pad.b;
+
+  const minE = Math.min(...sampE), maxE = Math.max(...sampE);
+  const rE   = (maxE - minE) || 1;
+  const maxD = sampD.at(-1) || 1;
+
+  // canvas-coord helpers (already in device pixels)
+  const px = dist => (pad.l + (dist / maxD) * cw) * dpr;
+  const py = elev => (pad.t + ch - ((elev - minE) / rE) * ch) * dpr;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // ── grid ──────────────────────────────────────────────────────────────
+  ctx.save();
+  ctx.strokeStyle = '#191c28';
+  ctx.lineWidth   = dpr;
+  for (let i = 0; i <= 4; i++) {
+    const y = (pad.t + ch / 4 * i) * dpr;
+    ctx.beginPath(); ctx.moveTo(pad.l * dpr, y); ctx.lineTo((pad.l + cw) * dpr, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── filled area ───────────────────────────────────────────────────────
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(px(sampD[0]), py(sampE[0]));
+  for (let i = 1; i < sampD.length; i++) ctx.lineTo(px(sampD[i]), py(sampE[i]));
+  ctx.lineTo(px(maxD), (pad.t + ch) * dpr);
+  ctx.lineTo(px(0),    (pad.t + ch) * dpr);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(90,90,110,.18)';
+  ctx.fill();
+  ctx.restore();
+
+  // ── slope-coloured line ───────────────────────────────────────────────
+  ctx.save();
+  ctx.lineWidth = 2.5 * dpr;
+  ctx.lineJoin  = 'round';
+  ctx.lineCap   = 'round';
+  for (let i = 1; i < sampD.length; i++) {
+    ctx.beginPath();
+    ctx.strokeStyle = slopeColor(sampSlope[i] ?? 0);
+    ctx.moveTo(px(sampD[i - 1]), py(sampE[i - 1]));
+    ctx.lineTo(px(sampD[i]),     py(sampE[i]));
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Y axis labels ─────────────────────────────────────────────────────
+  ctx.save();
+  ctx.fillStyle    = '#3a3f57';
+  ctx.font         = `${Math.round(9.5 * dpr)}px Inter, system-ui, sans-serif`;
+  ctx.textAlign    = 'right';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const e = maxE - (rE / 4) * i;
+    const y = (pad.t + ch / 4 * i) * dpr;
+    ctx.fillText(`${Math.round(e)} m`, (pad.l - 4) * dpr, y);
+  }
+  ctx.restore();
+
+  // ── X axis labels ─────────────────────────────────────────────────────
+  ctx.save();
+  ctx.fillStyle    = '#3a3f57';
+  ctx.font         = `${Math.round(9 * dpr)}px Inter, system-ui, sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'top';
+  const nX = Math.min(6, sampD.length - 1);
+  for (let i = 0; i <= nX; i++) {
+    const dist = (maxD / nX) * i;
+    ctx.fillText(`${dist.toFixed(1)} km`, px(dist), (pad.t + ch + 3) * dpr);
+  }
+  ctx.restore();
+
+  // ── hover crosshair + dot ─────────────────────────────────────────────
+  if (hoverIdx !== undefined) {
+    const hx = px(sampD[hoverIdx]);
+    const hy = py(sampE[hoverIdx]);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.2)';
+    ctx.lineWidth   = dpr;
+    ctx.setLineDash([3 * dpr, 3 * dpr]);
+    ctx.beginPath(); ctx.moveTo(hx, pad.t * dpr); ctx.lineTo(hx, (pad.t + ch) * dpr); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(hx, hy, 4.5 * dpr, 0, 2 * Math.PI);
+    ctx.fillStyle   = slopeColor(sampSlope[hoverIdx] ?? 0);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth   = 1.5 * dpr;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// Attach hover interaction — canvas coords → data index → redraw + tooltip
+function attachElevHover(canvas) {
+  const tip = document.getElementById('elev-tip');
+  const onMove = (e) => {
+    const d = elevData;
+    if (!d) return;
+    const { sampD, sampE, sampSlope, W, H } = d;
+    const pad  = { t:6, r:10, b:24, l:42 };
+    const cw   = W - pad.l - pad.r;
+    const maxD = sampD.at(-1) || 1;
+    const rect = canvas.getBoundingClientRect();
+    const mx   = (e.clientX ?? e.touches?.[0]?.clientX ?? 0) - rect.left;
+    const relX = mx - pad.l;
+    if (relX < 0 || relX > cw) {
+      tip.hidden = true; elevData.hoverIdx = undefined; renderElevCanvas(canvas); return;
+    }
+    const dist = (relX / cw) * maxD;
+    let best = 0;
+    for (let i = 1; i < sampD.length; i++)
+      if (Math.abs(sampD[i] - dist) < Math.abs(sampD[best] - dist)) best = i;
+    elevData.hoverIdx = best;
+    renderElevCanvas(canvas);
+    const s = sampSlope[best] ?? 0;
+    tip.innerHTML = `<b style="color:${slopeColor(s)}">${Math.round(sampE[best])} m s.l.m.</b>&ensp;<span style="color:var(--text-dim)">${sampD[best].toFixed(2)} km · ${s >= 0 ? '+' : ''}${s.toFixed(1)}%</span>`;
+    tip.style.left = Math.min(mx + 10, W - 160) + 'px';
+    tip.hidden = false;
+  };
+  const onLeave = () => {
+    tip.hidden = true;
+    if (elevData) { elevData.hoverIdx = undefined; renderElevCanvas(canvas); }
+  };
+  canvas.onmousemove  = onMove;
+  canvas.onmouseleave = onLeave;
+  canvas.ontouchmove  = e => { e.preventDefault(); onMove(e); };
+}
+
 function showElevation() {
   const layer = pendingLayer;
   const geom  = pendingGeom;
+  const props = pendingProps || {};
   if (!layer || !geom) return;
 
   let coords = [];
-  if (geom.type==='LineString') coords = geom.coordinates;
-  else if (geom.type==='MultiLineString') geom.coordinates.forEach(s => coords.push(...s));
+  if (geom.type === 'LineString')      coords = geom.coordinates;
+  else if (geom.type === 'MultiLineString')
+    geom.coordinates.forEach(s => coords.push(...s));
 
-  const withZ = coords.filter(c => c.length >= 3 && !isNaN(c[2]));
-  if (withZ.length < 2) { toast('Nessuna quota Z nel layer. Esporta con coordinate 3D da QGIS.', 'error'); return; }
+  const withZ = coords.filter(c => c.length >= 3 && !isNaN(c[2]) && c[2] !== 0);
+  if (withZ.length < 2) {
+    const sample = coords[0];
+    const hint = sample?.length >= 3
+      ? `(Z=${sample[2]} — tutti a zero? Ricontrolla il Drape)`
+      : `(coordinate 2D — manca la terza dimensione)`;
+    toast(`Nessuna quota Z valida. ${hint}`, 'error');
+    return;
+  }
 
   const elevs = withZ.map(c => c[2]);
   const dists = [0];
-  for (let i=1; i<withZ.length; i++)
-    dists.push(dists[dists.length-1] + haversine(withZ[i-1], withZ[i]));
+  for (let i = 1; i < withZ.length; i++)
+    dists.push(dists.at(-1) + haversine(withZ[i - 1], withZ[i]));
 
-  const totalKm  = (dists[dists.length-1]/1000).toFixed(1);
-  const eleMin   = Math.min(...elevs).toFixed(0);
-  const eleMax   = Math.max(...elevs).toFixed(0);
-  const gain     = elevs.reduce((g,v,i)=> i>0&&v>elevs[i-1] ? g+(v-elevs[i-1]) : g, 0).toFixed(0);
+  const totalKm = (dists.at(-1) / 1000).toFixed(1);
+  const eleMin  = Math.min(...elevs).toFixed(0);
+  const eleMax  = Math.max(...elevs).toFixed(0);
+  const gain    = elevs.reduce((g, v, i) => i > 0 && v > elevs[i-1] ? g + (v - elevs[i-1]) : g, 0).toFixed(0);
 
+  // Chips: prefer feature attributes if present
+  const attrLunga = parseFloat(props['lunghezza [m]'] ?? props['lunghezza'] ?? props['Lunghezza [m]'] ?? props['Lunghezza']);
+  const attrPend  = parseFloat(props['pendenza media'] ?? props['pendenza'] ?? props['Pendenza media'] ?? props['Pendenza']);
   document.getElementById('pan-name').textContent  = (layer.name || 'Percorso').toUpperCase();
-  document.getElementById('pan-dist').textContent  = `${totalKm} km`;
-  document.getElementById('pan-gain').textContent  = `↑ ${gain} m`;
+  document.getElementById('pan-dist').textContent  = !isNaN(attrLunga) ? `${(attrLunga/1000).toFixed(2)} km` : `${totalKm} km`;
+  document.getElementById('pan-gain').textContent  = !isNaN(attrPend)  ? `↗ ${attrPend}%` : `↑ ${gain} m`;
   document.getElementById('pan-range').textContent = `${eleMin}–${eleMax} m`;
 
-  // sample max 300 pts
-  const step  = Math.max(1, Math.ceil(withZ.length/300));
-  const sampE = withZ.filter((_,i) => i%step===0).map(c=>c[2]);
-  const sampD = dists.filter((_,i) => i%step===0).map(d=>+(d/1000).toFixed(3));
-
-  document.getElementById('bot-panel').classList.add('open');
-
-  if (elevChart) { elevChart.destroy(); elevChart=null; }
-  const ctx = document.getElementById('elev-chart').getContext('2d');
-  elevChart = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels:sampD,
-      datasets:[{
-        data:sampE,
-        borderColor:'#FF4500',
-        backgroundColor:'rgba(255,69,0,.11)',
-        fill:true, tension:.3, borderWidth:2,
-        pointRadius:0, pointHoverRadius:5,
-        pointHoverBackgroundColor:'#FF4500'
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      animation:{ duration:300 },
-      plugins:{
-        legend:{ display:false },
-        tooltip:{
-          mode:'index', intersect:false,
-          backgroundColor:'rgba(19,21,29,.97)',
-          borderColor:'#272b3a', borderWidth:1,
-          titleColor:'#6e748f', bodyColor:'#dde1ef',
-          titleFont:{size:10}, bodyFont:{family:'Inter',size:13,weight:'600'},
-          callbacks:{
-            title:c => `${c[0].label} km`,
-            label:c => `${Math.round(c.parsed.y)} m s.l.m.`
-          }
-        }
-      },
-      scales:{
-        x:{ grid:{color:'#191c28'},
-          ticks:{color:'#3a3f57',font:{size:10},maxTicksLimit:8,
-            callback:(_,i,t)=> i===0||i===t.length-1||i%Math.ceil(t.length/6)===0 ? `${sampD[i]} km` : ''}
-        },
-        y:{ grid:{color:'#191c28'},
-          ticks:{color:'#3a3f57',font:{size:10},callback:v=>`${v} m`}
-        }
-      }
-    }
+  // Sample ≤ 300 points
+  const step  = Math.max(1, Math.ceil(withZ.length / 300));
+  const sampE = withZ.filter((_, i) => i % step === 0).map(c => c[2]);
+  const sampD = dists.filter((_, i) => i % step === 0).map(d => +(d / 1000).toFixed(3));
+  const sampSlope = sampD.map((_, i) => {
+    if (i === 0) return 0;
+    const dd = (sampD[i] - sampD[i-1]) * 1000;
+    return dd > 0 ? ((sampE[i] - sampE[i-1]) / dd) * 100 : 0;
   });
+
+  // ── Size canvas from panel width (always valid even when height=0) ────
+  const panel  = document.getElementById('bot-panel');
+  const canvas = document.getElementById('elev-chart');
+  const dpr    = window.devicePixelRatio || 1;
+  const W = (panel.offsetWidth || 640) - 0; // full width, padding handled inside draw
+  const H = 130;
+  canvas.width        = Math.round(W * dpr);
+  canvas.height       = Math.round(H * dpr);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  // Store data and draw BEFORE opening panel — canvas renders even when hidden
+  elevData = { sampD, sampE, sampSlope, W, H };
+  renderElevCanvas(canvas);
+  attachElevHover(canvas);
+
+  // Open panel — drawing already done, becomes visible as animation plays
+  panel.classList.add('open');
 }
 
 function closePanel() {
@@ -811,6 +1096,19 @@ function renderSidebar() {
   const items = [...ids].reverse().map(id => {
     const l  = layerMap[id];
     const gt = [l.isLine&&'Linee', l.isPoint&&'Punti', l.isPoly&&'Poligoni'].filter(Boolean).join(' · ');
+
+    const fieldsPanel = l.fieldsOpen && l.allFields.length ? `
+      <div class="ly-fields">
+        <div class="ly-fields-label">Campi nel popup</div>
+        ${l.allFields.map(f => {
+          const on = !l.hiddenFields.has(f);
+          return `<div class="ly-field-row" onclick="toggleField(${JSON.stringify(id)},${JSON.stringify(f)})">
+            <div class="ly-field-chk ${on?'on':''}">${on?'✓':''}</div>
+            <span class="ly-field-name" title="${esc(f)}">${esc(f)}</span>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
     return `
     <div class="layer-item">
       <div class="ly-head">
@@ -821,10 +1119,12 @@ function renderSidebar() {
       <div class="ly-meta">
         <span>${l.featureCount.toLocaleString('it-IT')} elem. · ${gt}${l.hasElev?' · 📈':''}</span>
         <div class="ly-acts">
+          ${l.allFields.length ? `<button class="ly-btn cfg ${l.fieldsOpen?'open':''}" onclick="toggleFieldPanel('${id}')" title="Filtra campi popup">⚙</button>` : ''}
           <button class="ly-btn" onclick="zoomTo('${id}')" title="Zoom al layer">⊞</button>
           <button class="ly-btn del" onclick="removeLayer('${id}')" title="Rimuovi layer">✕</button>
         </div>
       </div>
+      ${fieldsPanel}
     </div>`;
   }).join('');
 
@@ -862,6 +1162,18 @@ function removeLayer(id) {
 }
 
 function zoomTo(id) { fitGeo(layerMap[id].geo); }
+
+/* ── FIELD FILTER ───────────────────────────────────────────────────────── */
+function toggleFieldPanel(id) {
+  layerMap[id].fieldsOpen = !layerMap[id].fieldsOpen;
+  renderSidebar();
+}
+function toggleField(id, field) {
+  const l = layerMap[id];
+  if (l.hiddenFields.has(field)) l.hiddenFields.delete(field);
+  else l.hiddenFields.add(field);
+  renderSidebar();
+}
 
 function fitAll() {
   const all = Object.values(layerMap).flatMap(l => l.geo.features);
