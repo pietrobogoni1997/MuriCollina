@@ -493,9 +493,9 @@ button{font-family:inherit;cursor:pointer}
     <div class="topbar-sep"></div>
 
     <div id="topbar-right">
-      <button class="tbtn primary" onclick="document.getElementById('file-input').click()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        Carica layer
+      <button id="sb-tog" class="tbtn primary" onclick="toggleSidebar()" title="Mostra/nascondi layer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M14 9l3 3-3 3"/></svg>
+        Mostra layer
       </button>
       <button id="credits-btn" class="tbtn" onclick="toggleCredits()" title="Crediti">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -530,9 +530,6 @@ button{font-family:inherit;cursor:pointer}
         </div>
       </div>
 
-      <button id="sb-tog" class="tbtn active" onclick="toggleSidebar()" title="Mostra/nascondi layer">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><path d="M14 9l3 3-3 3"/></svg>
-      </button>
     </div>
   </div>
 
@@ -1584,7 +1581,6 @@ if (!sbOpen) {
 function toggleSidebar() {
   sbOpen = !sbOpen;
   document.getElementById('sidebar').classList.toggle('collapsed', !sbOpen);
-  document.getElementById('sb-tog').classList.toggle('active', sbOpen);
   const scrim = document.getElementById('sb-scrim');
   if (scrim) scrim.classList.toggle('active', sbOpen);
 }
