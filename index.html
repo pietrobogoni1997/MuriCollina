@@ -52,7 +52,7 @@
 .maplibregl-map{position:relative;width:100%;height:100%;overflow:hidden;outline:none;background:var(--bg)}
 .maplibregl-canvas{position:absolute;left:0;top:0}
 .maplibregl-canvas-container{position:absolute;top:0;bottom:0;left:0;right:0}
-.maplibregl-canvas-container.maplibregl-interactive{cursor:grab;user-select:none}
+.maplibregl-canvas-container.maplibregl-interactive{cursor:grab;user-select:none;touch-action:none}
 .maplibregl-canvas-container.maplibregl-interactive:active{cursor:grabbing}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right,
 .maplibregl-ctrl-top-left,.maplibregl-ctrl-top-right{position:absolute;pointer-events:none;z-index:2}
@@ -442,7 +442,39 @@ button{font-family:inherit;cursor:pointer}
 }
 
 #file-input{display:none}
-@media(max-width:600px){#sidebar{display:none}}
+
+/* ── MOBILE ──────────────────────────────────────────────────────────────── */
+#map{touch-action:none}
+
+@media(max-width:600px){
+  /* Topbar: smaller logo, scrollable buttons */
+  #topbar{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));gap:4px}
+  .logo-text{font-size:18px}
+  .topbar-sep{display:none}
+  #topbar-right{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:1;gap:3px}
+  #topbar-right::-webkit-scrollbar{display:none}
+  .tbtn{min-height:40px;padding:0 9px;font-size:11px;flex-shrink:0}
+  /* Hide the disabled planning button on mobile — not useful */
+  #topbar button[disabled]{display:none}
+
+  /* Sidebar: slide-over overlay on mobile instead of hidden */
+  #sidebar{
+    position:fixed;top:var(--top-h);left:0;bottom:0;
+    width:min(var(--sb-w),85vw);z-index:200;
+    transform:translateX(-100%);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+    display:flex!important;
+  }
+  #sidebar.collapsed{transform:translateX(-100%)}
+  #sidebar:not(.collapsed){transform:translateX(0)}
+
+  /* Scrim behind open sidebar */
+  #sb-scrim{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.55);display:none}
+  #sb-scrim.active{display:block}
+
+  /* Bottom panel: taller for easier reading */
+  :root{--pan-h:210px}
+}
 </style>
 
 <!-- HTML ─────────────────────────────────────────────────────────────────── -->
@@ -538,6 +570,9 @@ button{font-family:inherit;cursor:pointer}
         <div class="sr"><span class="sr-l">Elementi totali</span><span class="sr-v" id="st-feats">0</span></div>
       </div>
     </div>
+
+    <!-- Mobile scrim (closes sidebar on outside tap) -->
+    <div id="sb-scrim" onclick="toggleSidebar()"></div>
 
     <!-- MAP -->
     <div id="map-wrap">
@@ -924,6 +959,12 @@ function addLayer(name, geo) {
       paint:{ 'line-color': lineColor,
         'line-width':['interpolate',['linear'],['zoom'],8,1.5,14,2.5,18,4] } });
 
+  // Wide invisible hit layer for easy mobile tapping (on top of visible line)
+  if (isLine)
+    map.addLayer({ id:`${id}H`, type:'line', source:id,
+      filter:['match',['geometry-type'],['LineString','MultiLineString'],true,false],
+      paint:{ 'line-color':'transparent', 'line-width':20, 'line-opacity':0 } });
+
   if (isPoint)
     map.addLayer({ id:`${id}P`, type:'circle', source:id,
       filter:['match',['geometry-type'],['Point','MultiPoint'],true,false],
@@ -956,7 +997,7 @@ function addLayer(name, geo) {
         'circle-stroke-width':1.5, 'circle-stroke-color':'#ffffff' } });
   }
 
-  [`${id}F`,`${id}L`,`${id}P`,`${id}ES`,`${id}EE`].forEach(lid => {
+  [`${id}F`,`${id}L`,`${id}H`,`${id}P`,`${id}ES`,`${id}EE`].forEach(lid => {
     if (!map.getLayer(lid)) return;
     map.on('click', lid, e => {
       e.originalEvent._featureClick = true;
@@ -1420,7 +1461,7 @@ function toggleVis(id) {
   const l = layerMap[id];
   l.visible = !l.visible;
   const v = l.visible ? 'visible' : 'none';
-  [`${id}F`,`${id}L`,`${id}P`,`${id}ES`,`${id}EA`,`${id}EE`].forEach(lid => {
+  [`${id}F`,`${id}L`,`${id}H`,`${id}P`,`${id}ES`,`${id}EA`,`${id}EE`].forEach(lid => {
     if (map.getLayer(lid)) map.setLayoutProperty(lid,'visibility',v);
   });
   renderSidebar();
@@ -1429,7 +1470,7 @@ function toggleVis(id) {
 function removeLayer(id) {
   if (popup) { popup.remove(); popup=null; }
   closePanel(); elevData = null; clearMapHoverMarker();
-  [`${id}F`,`${id}L`,`${id}P`,`${id}ES`,`${id}EA`,`${id}EE`].forEach(lid => {
+  [`${id}F`,`${id}L`,`${id}H`,`${id}P`,`${id}ES`,`${id}EA`,`${id}EE`].forEach(lid => {
     if (map.getLayer(lid)) map.removeLayer(lid);
   });
   if (map.getSource(id)) map.removeSource(id);
@@ -1535,11 +1576,17 @@ document.getElementById('file-input').addEventListener('change', e => {
 });
 
 /* ── TOGGLES ────────────────────────────────────────────────────────────── */
-let sbOpen = true;
+let sbOpen = window.innerWidth > 600;
+if (!sbOpen) {
+  document.getElementById('sidebar').classList.add('collapsed');
+  document.getElementById('sb-tog').classList.remove('active');
+}
 function toggleSidebar() {
   sbOpen = !sbOpen;
   document.getElementById('sidebar').classList.toggle('collapsed', !sbOpen);
   document.getElementById('sb-tog').classList.toggle('active', sbOpen);
+  const scrim = document.getElementById('sb-scrim');
+  if (scrim) scrim.classList.toggle('active', sbOpen);
 }
 
 let guideOpen = false;
