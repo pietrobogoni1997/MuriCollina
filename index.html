@@ -355,7 +355,7 @@ button{font-family:inherit;cursor:pointer}
 .pop-hd h3{
   font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
   letter-spacing:.03em;color:var(--accent);text-transform:uppercase;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:normal;word-break:break-word;
 }
 .pop-hd p{font-size:11px;color:var(--text-dim);margin-top:1px}
 .pop-props{max-height:230px;overflow-y:auto;padding:4px 0}
@@ -955,7 +955,7 @@ function onFeatureClick(e, lid) {
       ${showElevBtn ? `<button class="pop-elev-btn" onclick="showElevation()">📈 Visualizza profilo altimetrico</button>` : ''}
     </div>`;
 
-  popup = new maplibregl.Popup({ closeButton:true, closeOnClick:false, offset:10 })
+  popup = new maplibregl.Popup({ closeButton:true, closeOnClick:false, offset:14, anchor:'bottom' })
     .setLngLat(e.lngLat).setHTML(html).addTo(map);
 }
 
@@ -1374,7 +1374,21 @@ function removeLayer(id) {
   });
   if (map.getSource(id)) map.removeSource(id);
   if (map.getSource(`${id}E`)) map.removeSource(`${id}E`);
+  // Reset preset button if this was a preset layer
+  const layerName = layerMap[id]?.name;
   delete layerMap[id];
+  if (layerName) {
+    PRESETS.forEach((p, i) => {
+      if (p.name === layerName) {
+        const btn  = document.getElementById(`preset-btn-${i}`);
+        const spin = document.getElementById(`preset-spin-${i}`);
+        const lbl  = document.getElementById(`preset-lbl-${i}`);
+        if (btn)  btn.disabled = false;
+        if (spin) spin.style.display = 'none';
+        if (lbl)  { lbl.textContent = 'Carica'; lbl.style.display = 'block'; lbl.style.color = ''; }
+      }
+    });
+  }
   renderSidebar();
   renderStats();
 }
