@@ -664,7 +664,7 @@ const COLORS = [
    L'icona è opzionale (default: 🗺️).
    ─────────────────────────────────────────────────────────────────────────── */
 const PRESETS = [
-   { name: 'Tutti i muri', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/Muri_v9.geojson', icon: '🚵‍♂️' },
+   { name: 'Tutti i muri', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/Muri.geojson', icon: '🚵‍♂️' },
    { name: 'MADDAness 2020', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/MADDAness_2020.geojson', icon: '0️⃣' },
    { name: 'MADDAness 2021', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/MADDAness_2021.geojson', icon: '1️⃣' },
    { name: 'MADDAness 2022', url: 'https://raw.githubusercontent.com/pietrobogoni1997/MuriCollina/main/MADDAness_2022.geojson', icon: '2️⃣' },
@@ -1028,7 +1028,13 @@ function onFeatureClick(e, lid) {
 
   const propsHtml = rows.length
     ? rows.slice(0,18).map(([k,v]) =>
-        `<div class="pr"><span class="pk">${esc(k)}</span><span class="pv">${v!==null&&v!==undefined?esc(String(v)):'—'}</span></div>`
+        `<div class="pr"><span class="pk">${esc(k)}</span><span class="pv">${
+  v !== null && v !== undefined
+    ? (String(v).startsWith('http')
+        ? `<a href="${esc(String(v))}" target="_blank" rel="noopener">${esc(String(v))}</a>`
+        : esc(String(v)))
+    : '—'
+}</span></div>`
       ).join('') + (rows.length>18 ? `<div style="padding:4px 12px;font-size:11px;color:var(--text-mute)">…+${rows.length-18} attributi</div>` : '')
     : `<div style="padding:8px 12px;font-size:12px;color:var(--text-dim);font-style:italic">Nessun attributo</div>`;
 
