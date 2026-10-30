@@ -616,17 +616,17 @@ button{font-family:inherit;cursor:pointer}
     </div>
     <div>
       <div class="credits-name">pietro<span>BOGONI</span></div>
-      <div class="credits-role">Sviluppatore &amp; curatore dati</div>
+      <div class="credits-role">mi piacciono i muri</div>
     </div>
   </div>
   <a class="credits-link" href="https://www.strava.com/athletes/29286239" target="_blank" rel="noopener">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
-    Profilo Strava
+    Strava
   </a>
   <div class="credits-div"></div>
   <div class="credits-tech">
     Mappa: MapLibre GL JS · Dati: © OpenStreetMap<br>
-    Tracciati: Strava · Vettori: QGIS
+    Tracciati: <a href="https://www.maddaness.com/#tracce target="_blank" rel="noopener">MADDANESS</a> · Vettori: QGIS
   </div>
 </div>
 
@@ -801,8 +801,12 @@ async function loadFile(file) {
         return;
       }
 
-    } else if (ext === 'gpx') {
+        } else if (ext === 'gpx') {
       geo = parseGPX(await file.text());
+      // Se il GPX contiene un percorso/traccia, evidenzia i muri attraversati
+      const routeLine = geo.features.find(f =>
+        f.geometry.type === 'LineString' && f.geometry.coordinates.length > 10);
+      if (routeLine) setTimeout(() => highlightMuriOnRoute(routeLine.geometry.coordinates), 300);
 
     } else if (ext === 'gpkg') {
       toast('GPKG non supportato nel browser. Esporta come GeoJSON da QGIS.', 'error'); return;
@@ -823,7 +827,48 @@ async function loadFile(file) {
     toast(`Errore: ${err.message}`, 'error');
   }
 }
+/* ── ROUTE ↔ MURI HIGHLIGHT ─────────────────────────────────────────────── */
+function ptSegDist(p, a, b) {
+  const dx = b[0]-a[0], dy = b[1]-a[1];
+  if (dx===0 && dy===0) {
+    const ex=(p[0]-a[0])*111320*Math.cos(p[1]*Math.PI/180), ey=(p[1]-a[1])*111320;
+    return Math.sqrt(ex*ex+ey*ey);
+  }
+  const t = Math.max(0, Math.min(1, ((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));
+  const ex=(p[0]-a[0]-t*dx)*111320*Math.cos(p[1]*Math.PI/180), ey=(p[1]-a[1]-t*dy)*111320;
+  return Math.sqrt(ex*ex+ey*ey);
+}
 
+function lineNearRoute(lineCoords, routeCoords, threshM) {
+  for (const lp of lineCoords)
+    for (let i = 0; i < routeCoords.length-1; i++)
+      if (ptSegDist(lp, routeCoords[i], routeCoords[i+1]) <= threshM) return true;
+  return false;
+}
+
+function highlightMuriOnRoute(routeCoords) {
+  const THRESH = 40; // metri
+  Object.values(layerMap).forEach(layer => {
+    if (!layer.isLine) return;
+    const hlId = `${layer.id}HL`;
+    if (!map.getLayer(hlId)) return;
+    const hitIdxs = [];
+    layer.geo.features.forEach((feat, i) => {
+      let coords = [];
+      if (feat.geometry.type === 'LineString') coords = feat.geometry.coordinates;
+      else if (feat.geometry.type === 'MultiLineString')
+        feat.geometry.coordinates.forEach(s => coords.push(...s));
+      if (lineNearRoute(coords, routeCoords, THRESH)) hitIdxs.push(i);
+    });
+    if (hitIdxs.length) {
+      map.setFilter(hlId, ['in', ['get','_gvIdx'], ['literal', hitIdxs]]);
+      map.setLayoutProperty(hlId, 'visibility', 'visible');
+      toast(`${hitIdxs.length} muri sul percorso evidenziati`, 'success');
+    } else {
+      map.setLayoutProperty(hlId, 'visibility', 'none');
+    }
+  });
+}
 /* ── GPX PARSER ─────────────────────────────────────────────────────────── */
 function parseGPX(text) {
   const doc  = new DOMParser().parseFromString(text, 'text/xml');
@@ -969,6 +1014,14 @@ function addLayer(name, geo) {
         'circle-radius':['interpolate',['linear'],['zoom'],8,3,14,6],
         'circle-stroke-width':1.5,'circle-stroke-color':'#0c0d13' } });
 
+    // Highlight layer for route-crossing detection (hidden by default)
+  if (isLine)
+    map.addLayer({ id:`${id}HL`, type:'line', source:id,
+      filter:['boolean', false],
+      layout:{ visibility:'none' },
+      paint:{ 'line-color':'#00eaff', 'line-opacity':0.9,
+        'line-width':['interpolate',['linear'],['zoom'],8,4,14,7,18,10] } });
+  
   // Endpoint markers only for climb layers (those with slope attribute)
   // Full route traces have hundreds of features → skip to avoid marker clutter
   if (isLine && slopeProp) {
@@ -994,7 +1047,7 @@ function addLayer(name, geo) {
         'circle-stroke-width':1.5, 'circle-stroke-color':'#ffffff' } });
   }
 
-  [`${id}F`,`${id}L`,`${id}H`,`${id}P`,`${id}ES`,`${id}EE`].forEach(lid => {
+  [`${id}F`,`${id}L`,`${id}H`,`${id}HL`,`${id}P`,`${id}ES`,`${id}EE`].forEach(lid => {
     if (!map.getLayer(lid)) return;
     map.on('click', lid, e => {
       e.originalEvent._featureClick = true;
